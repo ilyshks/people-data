@@ -1,0 +1,13 @@
+Single-database configuration for Flask.
+
+To create a new migration, run:
+
+    flask db migrate
+
+To apply the latest migrations, run:
+
+    flask db upgrade
+
+To revert to a previous migration, run:
+
+    flask db downgrade <revision>
