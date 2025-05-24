@@ -7,9 +7,9 @@
 ## Технологии
 
 * **Python 3.12**
-* **Flask** - веб-фреймворк.
+* **Flask** - веб-фреймворк, отлично подходит для небольшого сервиса.
 * **SQLAlchemy** - ORM для работы с базой данных.
-* **PostgreSQL** - база данных.
+* **PostgreSQL** - база данных, использую её, так как важны плюсы реляционной БД в проекте.
 * **Nginx** - веб-сервер и reverse proxy.
 * **Waitress** - WSGI сервер для production.
 * **unittest** - библиотека для модульного тестирования.
@@ -56,8 +56,21 @@
     ```bash
     flask fetch-people
     ```
+6.  **Запуск nginx:**
+    
+    Скопируйте nginx.conf в директорию, в которой лежит nginx.
+    Если у Вас Windows, возможно потребуется отредактировать файл hosts.
+    Добавьте туда строчку: `127.0.0.1 homepage`.
 
-6.  **Запуск приложения:**
+    ```bash
+    start nginx
+    ```
+    Для остановки nginx:
+    ```bash
+    nginx -s quit
+    ```
+
+7.  **Запуск приложения:**
 
     ```bash
     waitress-serve --port=8000 app:app
@@ -77,8 +90,7 @@
 
     Это запустит приложение, базу данных PostgreSQL, Nginx и PgAdmin.
 
-    Приложение будет доступно по адресу: `http://localhost:8080`
-    PgAdmin будет доступен по адресу: `http://localhost:8081`
+    Приложение будет доступно по адресу: `http://homepage`
 
 
 ## Роуты
@@ -98,7 +110,21 @@
 
 Модульные тесты находятся в директории `tests`.
 
+**Настройка переменных окружения:**
+
+    Создайте файл `.env.testing` в директории tests и настройте следующие переменные:
+
+    ```
+    DB_USER=your_db_user
+    DB_PASSWORD=your_db_password
+    DB_HOST=your_db_host
+    DB_PORT=your_db_port
+    DB_NAME=your_test_db_name
+    SECRET_KEY=your_secret_key  # Сгенерируйте случайный ключ
+    ```
+
 **Запуск тестов:**
 
 ```bash
 python -m unittest discover tests
+```
