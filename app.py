@@ -1,11 +1,11 @@
 import sqlalchemy
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, flash
 import requests
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
-
+from sqlalchemy import func
 
 load_dotenv()
 
@@ -13,6 +13,7 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = (f'postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}'
                                          f'@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 from models import People
@@ -34,8 +35,7 @@ def get_people_data(num=1):
         return None
 
 
-def fetch_people():
-    num_people_to_fetch = 1000
+def fetch_people(num_people_to_fetch=1000):
     people_added = 0
 
     while people_added < num_people_to_fetch:
@@ -59,13 +59,9 @@ def fetch_people():
                     phone_number=person['phone'],
                     email=person['email'],
                     location=person['location'],
-                    photo=photo_data,
-                    profile=None)
+                    photo=photo_data)
 
                 db.session.add(new_person)
-                db.session.flush()
-                profile_url = f'http://homepage/{new_person.id}'
-                new_person.profile = profile_url
                 commit_counter += 1
                 people_added_in_transaction += 1
                 if commit_counter % 100 == 0:
@@ -94,9 +90,39 @@ def fetch_people_command():
             print("Таблица уже содержит данные. Пропускаем загрузку.")
 
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
+@app.route('/load_random_people', methods=['POST'])
+def load_random_people():
+    people_count = int(request.form.get('people_count', 10))
+    fetch_people(people_count)
+    flash(f'Successfully loaded {people_count} people!', 'success')
+    return redirect(url_for('homepage'))
+
+
+@app.route('/', methods=['GET', 'POST'])
+def homepage():
+    per_page = int(request.args.get('per_page', 10))
+    page = int(request.args.get('page', 1))
+
+    people = People.query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return render_template(
+        'homepage.html',
+        people=people,
+        per_page=per_page,
+        url='http://homepage/'
+    )
+
+
+@app.route('/<int:user_id>')
+def get_profile(user_id):
+    person = People.query.get_or_404(user_id)
+    return render_template('profile.html', person=person)
+
+
+@app.route('/random')
+def get_random_profile():
+    random_person = People.query.order_by(func.random()).first()
+    return render_template('profile.html', person=random_person)
 
 
 if __name__ == '__main__':
