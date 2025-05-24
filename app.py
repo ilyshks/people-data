@@ -7,7 +7,8 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import func
 
-load_dotenv()
+
+load_dotenv('.env', override=True)
 
 
 app = Flask(__name__)
