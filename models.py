@@ -1,4 +1,5 @@
 from app import db
+import base64
 
 
 class People(db.Model):
@@ -10,4 +11,8 @@ class People(db.Model):
     email = db.Column(db.String(120), unique=True)
     location = db.Column(db.JSON)
     photo = db.Column(db.LargeBinary)
-    profile = db.Column(db.String(255))
+
+    def photo_base64(self):
+        if self.photo:
+            return base64.b64encode(self.photo).decode('utf-8')
+        return None
