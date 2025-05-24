@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>People</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .id {
+            width: 3%;
+            min-width: fit-content;
+        }
+        .gender {
+            width: 5%;
+            min-width: fit-content;
+        }
+        .email {
+            width: 12%;
+            min-width: fit-content;
+        }
+        .location-head {
+            width: 25%;
+            max-width: 200px;
+            border: 1px solid #ddd;
+        }
+        .location-cell {
+            width: 25%;
+            max-width: 200px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 0.9em;
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .photo {
+            width: 5%;
+            min-width: fit-content;
+        }
+        .form-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: inline-block;
+            width: 200px;
+        }
+        .btn {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            left: 140px;
+            z-index: 1000;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>People</h1>
+
+    <div class="form-container">
+        <h2>Load Random People</h2>
+        <form method="POST" action="{{ url_for('load_random_people') }}">
+            <div class="form-group">
+                <label for="people_count">Number of people to load:</label>
+                <input type="number" id="people_count" name="people_count" min="1" max="5000" value="10">
+            </div>
+            <button type="submit" class="btn">Load People</button>
+        </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <form method="GET" action="/homepage">
+        <label for="per_page">People per page:</label>
+        <input type="number" id="per_page" name="per_page" min="1" max="100" value="{{ per_page }}">
+        <button type="submit">Apply</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="id">ID</th>
+                <th class="gender">Gender</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Phone</th>
+                <th class="email">Email</th>
+                <th class="location-head">Location (JSON)</th>
+                <th class="photo">Photo</th>
+                <th>Profile</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for person in people.items %}
+            <tr>
+                <td>{{ person.id }}</td>
+                <td class="gender">{{ person.gender }}</td>
+                <td>{{ person.first_name }}</td>
+                <td>{{ person.last_name }}</td>
+                <td>{{ person.phone_number }}</td>
+                <td class="email">{{ person.email }}</td>
+                <td class="location-cell">{{ person.location|tojson|safe }}</td>
+                <td>
+                    {% if person.photo_base64() %}
+                        <img class="thumbnail" src="data:image/jpeg;base64,{{ person.photo_base64() }}" alt="Photo">
+                    {% else %}
+                        No photo
+                    {% endif %}
+                </td>
+                <td><a href="{{ url ~ person.id }}">{{ url ~ person.id }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {% if people.has_prev %}
+            <a href="{{ url_for('homepage', page=people.prev_num, per_page=per_page) }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ people.page }} of {{ people.pages }}</span>
+
+        {% if people.has_next %}
+            <a href="{{ url_for('homepage', page=people.next_num, per_page=per_page) }}">Next</a>
+        {% endif %}
+    </div>
+</body>
+</html>

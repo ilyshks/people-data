@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - {{ person.first_name }} {{ person.last_name }}</title>
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .profile-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 30px;
+        }
+        .profile-info {
+            flex-grow: 1;
+        }
+        .profile-field {
+            margin-bottom: 15px;
+        }
+        .field-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            {% if person.photo_base64() %}
+            <img src="data:image/jpeg;base64,{{ person.photo_base64() }}"
+                 alt="Profile Photo" class="profile-photo">
+            {% else %}
+            <div class="profile-photo" style="background: #eee; display: flex; align-items: center; justify-content: center;">
+                No Photo
+            </div>
+            {% endif %}
+
+            <div class="profile-info">
+                <h1>{{ person.first_name }} {{ person.last_name }}</h1>
+                <p>{{ person.email }}</p>
+            </div>
+        </div>
+
+        <div class="profile-details">
+            <div class="profile-field">
+                <span class="field-label">Gender:</span>
+                <span>{{ person.gender }}</span>
+            </div>
+            <div class="profile-field">
+                <span class="field-label">Phone:</span>
+                <span>{{ person.phone_number }}</span>
+            </div>
+            <div class="profile-field">
+                <span class="field-label">Location:</span>
+                <span>{{ person.location }}</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
